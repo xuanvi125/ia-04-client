@@ -13,14 +13,27 @@ function SignUp() {
     formState: { errors, isSubmitting },
   } = useForm();
   const onSubmit = async (data) => {
-    const response = await AuthService.signUp(data);
-    if (response.statusCode === 400) {
-      toast.error(response.message);
-      return;
-    }
-    toast.success(response.message);
-    navigate("/login");
+    toast.promise(
+      new Promise((resolve, reject) => {
+        AuthService.signUp(data).then((res) => {
+          if (res.statusCode === 400) {
+            reject(res);
+          } else resolve(res);
+        });
+      }),
+      {
+        loading: "Creating account...",
+        success: (res) => {
+          navigate("/login");
+          return res.message;
+        },
+        error: (err) => {
+          return err.message;
+        },
+      }
+    );
   };
+
   const password = watch("password");
   return (
     <section className=" dark bg-gray-900">
