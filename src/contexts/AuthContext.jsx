@@ -1,4 +1,5 @@
 import { createContext, useContext, useReducer, useEffect } from "react";
+import * as AuthService from "../services/AuthService";
 const authContext = createContext();
 function authReducer(state, action) {
   switch (action.type) {
@@ -39,9 +40,20 @@ export function AuthProvider({ children }) {
     const token = localStorage.getItem("token");
     if (!token) {
       dispatch({ type: "INIT", payload: { user: null, isAuth: false } });
-    } else {
-      dispatch({ type: "INIT", payload: { user: null, isAuth: true } });
+      return;
     }
+    async function fetchUser() {
+      const response = await AuthService.getProfile();
+      if (response.statusCode == 200) {
+        dispatch({
+          type: "INIT",
+          payload: { user: response.user, isAuth: true },
+        });
+      } else {
+        dispatch({ type: "INIT", payload: { user: null, isAuth: false } });
+      }
+    }
+    fetchUser();
   }, []);
 
   return (

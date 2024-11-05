@@ -5,68 +5,43 @@ import {
   Typography,
   IconButton,
   Button,
+  Avatar,
 } from "@material-tailwind/react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 
 function NavList() {
+  const { user, dispatch } = useAuth();
+  const navigate = useNavigate();
+  const handleLogOut = () => {
+    localStorage.removeItem("token");
+    dispatch({ type: "LOG_OUT" });
+    navigate("/login");
+  };
   return (
     <ul className="my-2 flex flex-col gap-2 lg:mb-0 lg:mt-0 lg:flex-row lg:items-center lg:gap-6">
-      <Typography
-        as="li"
-        variant="small"
-        color="blue-gray"
-        className="p-1 font-medium"
-      >
-        <a
-          href="#"
-          className="flex items-center hover:text-blue-500 transition-colors"
-        >
-          Pages
-        </a>
-      </Typography>
-      <Typography
-        as="li"
-        variant="small"
-        color="blue-gray"
-        className="p-1 font-medium"
-      >
-        <a
-          href="#"
-          className="flex items-center hover:text-blue-500 transition-colors"
-        >
-          Account
-        </a>
-      </Typography>
-      <Typography
-        as="li"
-        variant="small"
-        color="blue-gray"
-        className="p-1 font-medium"
-      >
-        <a
-          href="#"
-          className="flex items-center hover:text-blue-500 transition-colors"
-        >
-          Blocks
-        </a>
-      </Typography>
-      <Typography
-        as="li"
-        variant="small"
-        color="blue-gray"
-        className="p-1 font-medium"
-      >
-        <a
-          href="#"
-          className="flex items-center hover:text-blue-500 transition-colors"
-        >
-          Docs
-        </a>
-      </Typography>
-      <Link to="/sign-up">
-        <Button>Sign Up</Button>
-      </Link>
+      {user && (
+        <div className="flex gap-3 items-center">
+          <Typography>
+            Welcome back, <span className="font-bold">{user?.email}</span>
+          </Typography>
+          <Link to="/profile">
+            <Avatar
+              src="https://docs.material-tailwind.com/img/face-2.jpg"
+              alt="avatar"
+            />
+          </Link>
+          <Button onClick={handleLogOut} className="bg-red-400">
+            Log Out
+          </Button>
+        </div>
+      )}
+      {!user && (
+        <Link to="/login">
+          <Button>Login</Button>
+        </Link>
+      )}
     </ul>
   );
 }

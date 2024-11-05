@@ -5,20 +5,21 @@ import Home from "./pages/Home";
 import { Toaster } from "react-hot-toast";
 import ProtectedRoute from "./utils/ProtectRoute";
 import GuestRoute from "./utils/GuestRoute";
+import ProfilePage from "./pages/ProfilePage";
 
 function App() {
   return (
     <>
       <Routes>
+        <Route path="/" element={<Home />} />
         <Route
-          path="/"
+          path="/profile"
           element={
             <ProtectedRoute>
-              <Home />
+              <ProfilePage />
             </ProtectedRoute>
           }
         />
-
         <Route
           path="/sign-up"
           element={

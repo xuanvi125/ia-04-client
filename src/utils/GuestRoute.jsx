@@ -3,7 +3,6 @@ import { useAuth } from "../contexts/AuthContext";
 import Loading from "../components/Loading";
 function GuestRoute({ children }) {
   const { isInitialize, isAuth } = useAuth();
-  console.log(isInitialize, isAuth);
   if (!isInitialize) return <Loading />;
   if (isAuth) {
     return <Navigate to="/" replace />;

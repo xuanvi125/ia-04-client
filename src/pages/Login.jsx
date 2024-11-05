@@ -1,19 +1,42 @@
 import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
-import * as AuthServices from "../services/AuthService";
 import toast from "react-hot-toast";
 import { useEffect } from "react";
-
+import * as AuthService from "../services/AuthService";
+import { useAuth } from "../contexts/AuthContext";
+import { Typography } from "@material-tailwind/react";
 function Login() {
   const {
     register,
     handleSubmit,
-    formState: { isSubmitting },
+    formState: { isSubmitting, errors },
   } = useForm();
+  const { dispatch } = useAuth();
+
   const onSubmit = async (data) => {
-    toast.success(data);
+    toast.promise(
+      new Promise(async (resolve, reject) => {
+        const res = await AuthService.signIn(data);
+        if (res.access_token) {
+          resolve(res);
+        } else {
+          reject(res);
+        }
+      }),
+      {
+        loading: "Signing in...",
+        success: (res) => {
+          localStorage.setItem("token", res.access_token);
+          dispatch({ type: "LOG_IN", payload: { user: res.user } });
+          return "Sign in success";
+        },
+        error: (error) => {
+          return error.message;
+        },
+      }
+    );
   };
-  useEffect(() => {}, []);
+
   return (
     <section className=" dark min-h-screen bg-gray-900">
       <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
@@ -51,7 +74,13 @@ function Login() {
                   Password
                 </label>
                 <input
-                  {...register("password", { required: true })}
+                  {...register("password", {
+                    required: true,
+                    minLength: {
+                      value: 6,
+                      message: "Password must have at least 6 characters",
+                    },
+                  })}
                   type="password"
                   name="password"
                   id="password"
@@ -59,6 +88,11 @@ function Login() {
                   className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                   required
                 />
+                {errors?.password && (
+                  <Typography color="red" className="mt-1">
+                    {errors.password.message}
+                  </Typography>
+                )}
               </div>
               <button
                 disabled={isSubmitting}
